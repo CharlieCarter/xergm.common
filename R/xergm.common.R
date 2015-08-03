@@ -1,15 +1,16 @@
 
-# display version number and date when the package is loaded
-.onAttach <- function(libname, pkgname) {
-  desc  <- packageDescription(pkgname, libname)
-  packageStartupMessage(
-    'Version:  ', desc$Version, '\n', 
-    'Date:     ', desc$Date, '\n', 
-    'Authors:  Philip Leifeld (University of Konstanz)',
-    '\n\nPlease cite the xergm package in your publications ', 
-    '-- see citation("xergm").'
-  )
-}
+## display version number and date when the package is loaded
+#.onAttach <- function(libname, pkgname) {
+#  desc  <- packageDescription(pkgname, libname)
+#  packageStartupMessage(
+#    'Package:  xergm.common\n', 
+#    'Version:  ', desc$Version, '\n', 
+#    'Date:     ', desc$Date, '\n', 
+#    'Authors:  Philip Leifeld (Eawag (ETH) and University of Bern)',
+#    '\n\nPlease cite the xergm package in your publications ', 
+#    '-- see citation("xergm").'
+#  )
+#}
 
 # generics for extracting the formula from an estimation object
 setGeneric("getformula", function(x) standardGeneric("getformula"), 

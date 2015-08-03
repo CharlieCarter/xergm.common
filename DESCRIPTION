@@ -2,9 +2,9 @@ Package: xergm.common
 Version: 1.5.1
 Date: 2015-08-03
 Title: Common Infrastructure for Extensions of Exponential Random Graph Models
-Authors@R: person(given = "Philip", family = "Leifeld", email = "philip.leifeld@uni-konstanz.de", role = c("aut", "cre"))
+Authors@R: person(given = "Philip", family = "Leifeld", email = "philip.leifeld@eawag.ch", role = c("aut", "cre"))
 Description: Datasets and definitions of generic functions used in dependencies of the xergm package.
-Depends: R (>= 2.14.0)
+Depends: R (>= 2.14.0), ergm (>= 3.2.4)
 Imports: methods, utils
 Suggests: xergm
 License: GPL (>= 2)
