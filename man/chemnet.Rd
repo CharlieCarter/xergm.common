@@ -153,7 +153,7 @@ sci <- scito * t(scifrom)  # equation 1 in the AJPS paper
 prefsim <- dist(intpos, method = "euclidean")  # equation 2
 prefsim <- max(prefsim) - prefsim  # equation 3
 prefsim <- as.matrix(prefsim)
-committee <- committee %*% t(committee)  # equation 4
+committee <- committee \%*\% t(committee)  # equation 4
 diag(committee) <- 0 # the diagonal has no meaning
 types <- types[, 1]  # convert to vector
 
