@@ -18,10 +18,10 @@ is.mat.directed <- function(mat) {
   if (nrow(mat) != ncol(mat)) {
     return(FALSE)
   } else if (!is.null(rownames(mat)) && !is.null(colnames(mat)) 
-      && any(rownames(mat) != colnames(mat))) {
+      && any(rownames(mat) != colnames(mat), na.rm = TRUE)) {
     return(FALSE)
   } else {
-    if (any(mat != t(mat))) {
+    if (any(as.matrix(mat) != t(as.matrix(mat)), na.rm = TRUE)) {
       return(TRUE)
     } else {
       return(FALSE)
