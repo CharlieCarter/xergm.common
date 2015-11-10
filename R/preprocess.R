@@ -467,6 +467,26 @@ adjust <- function(source, target, remove = TRUE, add = TRUE, value = NA,
     }
   }
   
+  # impute row or column labels if only one of them is present
+  for (i in 1:length(sources)) {
+    if (is.null(rownames(sources[[i]])) && !is.null(colnames(sources[[i]])) && 
+        nrow(sources[[i]]) == ncol(sources[[i]])) {
+      rownames(sources[[i]]) <- colnames(sources[[i]])
+    }
+    if (is.null(colnames(sources[[i]])) && !is.null(rownames(sources[[i]])) && 
+        nrow(sources[[i]]) == ncol(sources[[i]])) {
+      colnames(sources[[i]]) <- rownames(sources[[i]])
+    }
+    if (is.null(rownames(targets[[i]])) && !is.null(colnames(targets[[i]])) && 
+        nrow(targets[[i]]) == ncol(targets[[i]])) {
+      rownames(targets[[i]]) <- colnames(targets[[i]])
+    }
+    if (is.null(colnames(targets[[i]])) && !is.null(rownames(targets[[i]])) && 
+        nrow(targets[[i]]) == ncol(targets[[i]])) {
+      colnames(targets[[i]]) <- rownames(targets[[i]])
+    }
+  }
+  
   # go through sources and targets and do the actual adjustment
   for (i in 1:length(sources)) {
     if (!is.vector(sources[[i]]) && !class(sources[[i]]) %in% c("matrix", 
