@@ -487,6 +487,96 @@ adjust <- function(source, target, remove = TRUE, add = TRUE, value = NA,
     }
   }
   
+  # throw error if there are duplicate names (first sources, then targets)
+  for (i in 1:length(sources)) {
+    if (class(sources[[i]]) %in% c("matrix", "data.frame")) {
+      # row names
+      if (!is.null(rownames(sources[[i]]))) {
+        test.actual <- nrow(sources[[i]])
+        test.unique <- length(unique(rownames(sources[[i]])))
+        dif <- test.actual - test.unique
+        if (dif > 1) {
+          stop(paste0("At t = ", i, ", there are ", dif, 
+              " duplicate source row names."))
+        } else if (dif == 1) {
+          stop(paste0("At t = ", i, ", there is ", dif, 
+              " duplicate source row name."))
+        }
+      }
+      # column names
+      if (!is.null(colnames(sources[[i]]))) {
+        test.actual <- ncol(sources[[i]])
+        test.unique <- length(unique(colnames(sources[[i]])))
+        dif <- test.actual - test.unique
+        if (dif > 1) {
+          stop(paste0("At t = ", i, ", there are ", dif, 
+              " duplicate source column names."))
+        } else if (dif == 1) {
+          stop(paste0("At t = ", i, ", there is ", dif, 
+              " duplicate source column name."))
+        }
+      }
+    } else {
+      # vector names
+      if (!is.null(names(sources[[i]]))) {
+        test.actual <- length(sources[[i]])
+        test.unique <- length(unique(names(sources[[i]])))
+        dif <- test.actual - test.unique
+        if (dif > 1) {
+          stop(paste0("At t = ", i, ", there are ", dif, 
+              " duplicate source names."))
+        } else if (dif == 1) {
+          stop(paste0("At t = ", i, ", there is ", dif, 
+              " duplicate source name."))
+        }
+      }
+    }
+  }
+  for (i in 1:length(targets)) {
+    if (class(targets[[i]]) %in% c("matrix", "data.frame")) {
+      # row names
+      if (!is.null(rownames(targets[[i]]))) {
+        test.actual <- nrow(targets[[i]])
+        test.unique <- length(unique(rownames(targets[[i]])))
+        dif <- test.actual - test.unique
+        if (dif > 1) {
+          stop(paste0("At t = ", i, ", there are ", dif, 
+              " duplicate target row names."))
+        } else if (dif == 1) {
+          stop(paste0("At t = ", i, ", there is ", dif, 
+              " duplicate target row name."))
+        }
+      }
+      # column names
+      if (!is.null(colnames(targets[[i]]))) {
+        test.actual <- ncol(targets[[i]])
+        test.unique <- length(unique(colnames(targets[[i]])))
+        dif <- test.actual - test.unique
+        if (dif > 1) {
+          stop(paste0("At t = ", i, ", there are ", dif, 
+              " duplicate target column names."))
+        } else if (dif == 1) {
+          stop(paste0("At t = ", i, ", there is ", dif, 
+              " duplicate target column name."))
+        }
+      }
+    } else {
+      # vector names
+      if (!is.null(names(targets[[i]]))) {
+        test.actual <- length(targets[[i]])
+        test.unique <- length(unique(names(targets[[i]])))
+        dif <- test.actual - test.unique
+        if (dif > 1) {
+          stop(paste0("At t = ", i, ", there are ", dif, 
+              " duplicate target names."))
+        } else if (dif == 1) {
+          stop(paste0("At t = ", i, ", there is ", dif, 
+              " duplicate target name."))
+        }
+      }
+    }
+  }
+  
   # go through sources and targets and do the actual adjustment
   for (i in 1:length(sources)) {
     if (!is.vector(sources[[i]]) && !class(sources[[i]]) %in% c("matrix", 
@@ -765,9 +855,6 @@ adjust <- function(source, target, remove = TRUE, add = TRUE, value = NA,
       sources[[i]] <- sources[[i]][rownames(targets[[i]]), ]
     } else if (add == FALSE && (nrow(sources[[i]]) < nrow(targets[[i]]) || 
         any(rownames(sources[[i]]) != rownames(targets[[i]])))) {
-      #warning(paste("Resulting object(s) could not be sorted according to", 
-      #    "target because missing rows and/or columns were not added. Use", 
-      #    "argument 'add = TRUE' to prevent this."))
     }
     
     # convert back into network
