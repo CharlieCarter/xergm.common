@@ -10,6 +10,8 @@ preprocess(object, ..., lag = FALSE, covariate = FALSE,
     verbose = FALSE)
 }
 \details{
+IMPORTANT NOTE: Usage of this function is usually not necessary because the respective functionality has been built directly into the \code{btergm}, \code{mtergm}, and \code{tnam} function. However, it can be used as an alternative way of creating model terms manually.
+
 For use with the \code{btergm} function, lists of network matrices or covariates can be preprocessed using the \code{preprocess} function. The first object that is provided as an argument is adjusted to all remaining objects that are handed over via the \code{...} argument. The preprocess function can deal with constant or time-varying \code{matrix}, \code{vector} and \code{data.frame} objects. The user can specify whether the object of interest is a dependent network or a covariate and whether NA and structural zero removal should take into account missing data at previous or following time steps (\code{lag = TRUE}).
 
 The preprocessing procedure consists of four steps: (1) remove or impute missing data and/or structural zeroes in each object at each time step; (2) cross-sectional adjustment of matrix dimensions (e.g., if the object of interest has more observations than another object at the current time step, the observations are dropped from the object of interest); (3) backward-looking adjustment of matrix dimensions (if the object of interest is a dependent variable/network and the \code{lag = TRUE} argument is used); and (4) forward-looking adjustment of matrix dimensions (if the object of interest is a covariate and the \code{lag = TRUE} argument is used). The last two steps can be helpful for building lagged or delayed covariates which have to take into account missing data at other time steps as well.
@@ -62,9 +64,9 @@ model.1 <- btergm(networks ~ edges + mutual)
 summary(model.1)
 
 # When cross-temporal dependencies are specified, the dimensions 
-# of the matrices do not match. This would cause a problem for btergm:
+# of the matrices do not match and need to be adjusted by btergm:
 
-# btergm(networks[2:4] ~ edges + mutual + edgecov(networks[1:3])) # ERROR!
+# btergm(networks[2:4] ~ edges + mutual + edgecov(networks[1:3]))
 
 # This is because the first network in the dependent network and the 
 # first network in the lagged covariate are expected to have the same 
@@ -82,7 +84,8 @@ dep <- preprocess(networks, lag = TRUE, covariate = FALSE)
 # but not in the dependent network (that is, at the next time step). 
 # Therefore, node sets {a, b}, {c, l, m, n}, and {a} must be removed 
 # from the lagged covariate at t=1, t=2, and t=3, respectively, to make 
-# the dimensions compatible:
+# the dimensions compatible. While this is done automatically by btergm, 
+# it can also be done manually using the preprocess function:
 
 lag <- preprocess(networks, lag = TRUE, covariate = TRUE)
 
