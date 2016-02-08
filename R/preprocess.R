@@ -31,9 +31,9 @@ is.mat.directed <- function(mat) {
 
 
 # how many NAs are there per row or column?
-numMissing <- function(mat, type = "both") {
-  numrow <- apply(as.matrix(mat), 1, function(x) sum(is.na(x)))
-  numcol <- apply(as.matrix(mat), 2, function(x) sum(is.na(x)))
+numMissing <- function(mat, type = "both", na = NA) {
+  numrow <- apply(as.matrix(mat), 1, function(x) sum(x %in% na))
+  numcol <- apply(as.matrix(mat), 2, function(x) sum(x %in% na))
   if (type == "both") {
     return(numrow + numcol)
   } else if (type == "row") {
@@ -126,7 +126,7 @@ handleMissings <- function(mat, na = NA, method = "remove", logical = FALSE) {
   
   na.mat <- list()  # will contain matrices indicating which values are NA
   for (i in 1:length(mat)) {
-    na.mat[[i]] <- is.na(mat[[i]])
+    na.mat[[i]] <- apply(mat[[i]], 1:2, function(x) x %in% NA)
     if (length(mat) == 1) {  # used for reporting later
       time <- ""
     } else {
@@ -135,23 +135,23 @@ handleMissings <- function(mat, na = NA, method = "remove", logical = FALSE) {
     if (class(mat[[i]]) == "matrix") {
       # matrix objects
       # replace by real NAs, then count NAs
-      mat[[i]][mat[[i]] %in% na] <- NA
       obs <- length(mat[[i]])
-      missing.abs <- length(which(is.na(mat[[i]])))
+      missing.abs <- length(which(mat[[i]] %in% na))
       missing.perc <- round(100 * missing.abs / obs, digits = 2)
       
       # do the actual work
       if (method == "fillmode") {
         # fill with modal value (often 0 but not always)
-        nwunique <- unique(as.numeric(mat[[i]]))
-        nwmode <- nwunique[which.max(tabulate(match(mat[[i]], nwunique)))]
-        mat[[i]][is.na(mat[[i]])] <- nwmode
+        nwunique <- unique(as.numeric(mat[[i]][!mat[[i]] %in% na]))
+        nwmode <- nwunique[which.max(tabulate(match(mat[[i]][!mat[[i]] %in% 
+            na], nwunique)))]
+        mat[[i]][mat[[i]] %in% na] <- nwmode
         message(paste0("t = ", i, ": ", missing.perc, "% of the data (= ", 
             missing.abs, " ties) were replaced by the mode (", nwmode, 
             ") because they were NA."))
       } else if (method == "zero") {
         # impute 0 when NA
-        mat[[i]][is.na(mat[[i]])] <- 0
+        mat[[i]][mat[[i]] %in% na] <- 0
         message(paste0("t = ", i, ": ", missing.perc, "% of the data (= ", 
             missing.abs, " ties) were replaced by 0 because they were NA."))
       } else if (method == "remove") {
@@ -159,8 +159,9 @@ handleMissings <- function(mat, na = NA, method = "remove", logical = FALSE) {
         rowLabels <- rownames(mat[[i]])
         colLabels <- colnames(mat[[i]])
         if (onemode[[i]] == TRUE) {
-          while(sum(numMissing(mat[[i]])) > 0) {
-            indices <- which(numMissing(mat[[i]]) == max(numMissing(mat[[i]])))
+          while(sum(numMissing(mat[[i]], na = na)) > 0) {
+            indices <- which(numMissing(mat[[i]], na = na) == 
+                max(numMissing(mat[[i]], na = na)))
             mat[[i]] <- mat[[i]][-indices, -indices]
             rowLabels <- rowLabels[-indices]
             colLabels <- colLabels[-indices]
@@ -175,10 +176,10 @@ handleMissings <- function(mat, na = NA, method = "remove", logical = FALSE) {
             }
           }
         } else {
-          while(sum(numMissing(mat[[i]], type = "row")) + 
-              sum(numMissing(mat[[i]], type = "col")) > 0) {
-            rowNAs <- numMissing(mat[[i]], type = "row")
-            colNAs <- numMissing(mat[[i]], type = "col")
+          while(sum(numMissing(mat[[i]], type = "row", na = na)) + 
+              sum(numMissing(mat[[i]], type = "col", na = na)) > 0) {
+            rowNAs <- numMissing(mat[[i]], type = "row", na = na)
+            colNAs <- numMissing(mat[[i]], type = "col", na = na)
             maxNA <- max(c(rowNAs, colNAs))
             if (length(which(rowNAs == maxNA)) > 0) {
               indices <- which(rowNAs == maxNA)
