@@ -23,4 +23,8 @@ setGeneric("interpret", function(object, ...) standardGeneric("interpret"),
 # generics for goodness-of-fit assessment
 setGeneric("gof", function(object, ...) standardGeneric("gof"), 
     package = "xergm.common")
+    
+# generic checkdegeneracy function
+setGeneric("checkdegeneracy", function(object, ...) 
+    standardGeneric("checkdegeneracy"), package = "xergm.common")
 
