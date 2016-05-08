@@ -640,7 +640,7 @@ adjust <- function(source, target, remove = TRUE, add = TRUE, value = NA,
           insert <- rep(value, ncol(sources[[i]]))
           part1 <- sources[[i]][0:(add.row.indices[j] - 1), ]
           if (class(part1) != "matrix") {
-            if (sources.types[[i]] == "matrix") {
+            if (sources.types[[i]] %in% c("matrix", "network")) {
               part1 <- matrix(part1, nrow = 1)
             } else {
               part1 <- matrix(part1, ncol = 1)
