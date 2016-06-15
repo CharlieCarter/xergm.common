@@ -412,23 +412,26 @@ adjust <- function(source, target, remove = TRUE, add = TRUE, value = NA,
   }
   
   # convert each item if necessary and save nodal attributes
-  sources.attribnames <- list()
-  sources.attributes <- list()
-  sources.types <- list()
-  sources.onemode <- list()
-  sources.directed <- list()
-  targets.attribnames <- list()
-  targets.attributes <- list()
-  targets.types <- list()
-  targets.onemode <- list()
-  targets.directed <- list()
+  sources.attribnames <- list()  # names of additional vertex attributes
+  sources.attributes <- list()  # additional vertex attributes
+  sources.types <- list()  # matrix, network etc.
+  sources.onemode <- list()  # is the source network a one-mode network?
+  sources.directed <- list()  # is the source network directed?
+  sources.matrixnames <- list()  # names of additional matrices
+  sources.matrices <- list()  # additional matrices stored in the source network
+  targets.attribnames <- list()  # names of additional vertex attributes
+  targets.attributes <- list()  # additional vertex attributes
+  targets.types <- list()  # matrix, network etc.
+  targets.onemode <- list()  # is the target network a one-mode network?
+  targets.directed <- list()  # is the source network directed?
   for (i in 1:length(sources)) {
     sources.types[[i]] <- class(sources[[i]])
     if (class(sources[[i]]) == "network") {
       # save source attributes and other meta information in list
       sources.attribnames[[i]] <- list.vertex.attributes(sources[[i]])
       attributes <- list()
-      if (length(sources.attribnames) > 0) {
+      if (!is.null(sources.attribnames[[i]]) && 
+            length(sources.attribnames[[i]]) > 0) {
         for (j in 1:length(sources.attribnames[[i]])) {
           attributes[[j]] <- get.vertex.attribute(sources[[i]], 
               sources.attribnames[[i]][j])
@@ -437,6 +440,31 @@ adjust <- function(source, target, remove = TRUE, add = TRUE, value = NA,
       sources.attributes[[i]] <- attributes
       sources.onemode[[i]] <- !is.bipartite(sources[[i]])
       sources.directed[[i]] <- is.directed(sources[[i]])
+      
+      # network attributes (= other matrices)
+      temp <- list.network.attributes(sources[[i]])
+      temp <- temp[!temp %in% c("bipartite", "directed", "hyper", "loops", 
+          "mnext", "multiple", "n")]
+      if (length(temp) > 0) {
+        for (j in length(temp):1) {
+          if (!class(get.network.attribute(sources[[i]], temp[j])) %in% 
+              c("network", "matrix", "Matrix")) {
+            temp <- temp[-j]
+          }
+        }
+      }
+      sources.matrixnames[[i]] <- temp
+      matrices <- list()
+      if (!is.null(sources.matrixnames[[i]]) && 
+            length(sources.matrixnames[[i]]) > 0) {
+        for (j in 1:length(sources.matrixnames[[i]])) {
+          matrices[[j]] <- get.network.attribute(sources[[i]], 
+              sources.matrixnames[[i]][j])
+        }
+      }
+      sources.matrices[[i]] <- matrices
+      rm(temp)
+      
       sources[[i]] <- as.matrix(sources[[i]])  # convert to matrix
     } else if (class(sources[[i]]) == "matrix") {
       sources.onemode[[i]] <- is.mat.onemode(sources[[i]])
@@ -450,7 +478,8 @@ adjust <- function(source, target, remove = TRUE, add = TRUE, value = NA,
       # save target attributes and other meta information in list
       targets.attribnames[[i]] <- list.vertex.attributes(targets[[i]])
       attributes <- list()
-      if (length(targets.attribnames) > 0) {
+      if (!is.null(targets.attribnames[[i]]) && 
+            length(targets.attribnames[[i]]) > 0) {
         for (j in 1:length(targets.attribnames[[i]])) {
           attributes[[j]] <- get.vertex.attribute(targets[[i]], 
               targets.attribnames[[i]][j])
@@ -573,6 +602,40 @@ adjust <- function(source, target, remove = TRUE, add = TRUE, value = NA,
         } else if (dif == 1) {
           stop(paste0("At t = ", i, ", there is ", dif, 
               " duplicate target name."))
+        }
+      }
+    }
+  }
+  
+  # add original labels to saved network attributes (= matrices) if necessary
+  for (i in 1:length(sources)) {
+    if (sources.types[[i]] == "network" && !is.null(sources.matrices[[i]]) 
+        && length(sources.matrices[[i]]) > 0) {
+      for (j in 1:length(sources.matrices[[i]])) {
+        if (nrow(as.matrix(sources.matrices[[i]][[j]])) != 
+            nrow(as.matrix(sources[[i]])) || 
+            ncol(as.matrix(sources.matrices[[i]][[j]])) != 
+            ncol(as.matrix(sources[[i]]))) {
+          warning(paste("Network attribute", sources.matrixnames[[i]][j], 
+              "does not have the same dimensions as the source network at", 
+              "time step", i, "."))
+        }
+        if (class(sources.matrices[[i]][[j]]) == "network") {
+          if (sources.onemode[[i]] == TRUE) {
+            sources.matrices[[i]][[j]] <- set.vertex.attribute(
+                sources.matrices[[i]][[j]], "vertex.names", 
+                rownames(as.matrix(sources[[i]])))
+          } else {
+            sources.matrices[[i]][[j]] <- set.vertex.attribute(
+                sources.matrices[[i]][[j]], "vertex.names", 
+                c(rownames(as.matrix(sources[[i]])), 
+                colnames(as.matrix(sources[[i]]))))
+          }
+        } else {
+          rownames(sources.matrices[[i]][[j]]) <- 
+              rownames(as.matrix(sources[[i]]))
+          colnames(sources.matrices[[i]][[j]]) <- 
+              colnames(as.matrix(sources[[i]]))
         }
       }
     }
@@ -881,6 +944,18 @@ adjust <- function(source, target, remove = TRUE, add = TRUE, value = NA,
       sources[[i]]$removed.col <- removed.columns
       sources[[i]]$added.row <- add.row.labels
       sources[[i]]$added.col <- add.col.labels
+    }
+  }
+  
+  # adjust network attributes (= matrices) recursively and add back in
+  for (i in 1:length(sources)) {
+    if (sources.types[[i]] == "network" && !is.null(sources.matrixnames[[i]]) 
+        && length(sources.matrixnames[[i]]) > 0) {
+      for (j in 1:length(sources.matrixnames[[i]])) {
+        mat <- adjust(source = sources.matrices[[i]][[j]], 
+            target = sources[[i]], add = add, remove = remove, value = value)
+        set.network.attribute(sources[[i]], sources.matrixnames[[i]][j], mat)
+      }
     }
   }
   
