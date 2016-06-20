@@ -6,7 +6,7 @@
 #    'Package:  xergm.common\n', 
 #    'Version:  ', desc$Version, '\n', 
 #    'Date:     ', desc$Date, '\n', 
-#    'Authors:  Philip Leifeld (Eawag and University of Bern)',
+#    'Authors:  Philip Leifeld (University of Glasgow)',
 #    '\n\nPlease cite the xergm package in your publications ', 
 #    '-- see citation("xergm").'
 #  )
