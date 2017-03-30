@@ -9,5 +9,5 @@ citEntry(entry="Manual",
   year = year,
   note = vers,
   textVersion = paste("Leifeld, Philip (", year, "). xergm.common. Common infrastructure for eXtensions of Exponential Random Graph Models. ", vers, ".", sep = ""),
-  url = "http://CRAN.R-project.org/package=xergm.common"
+  url = "https://CRAN.R-project.org/package=xergm.common"
 )
