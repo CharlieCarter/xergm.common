@@ -61,5 +61,5 @@ get.network.attribute(nw.adjusted, "nwattrib2")  # returns adjusted sociomatrix
 get.vertex.attribute(nw.adjusted, "vattrib")  # returns adjusted vector
 }
 \seealso{
-\link{handleMissings} \link{preprocess}
+\link{handleMissings}
 }

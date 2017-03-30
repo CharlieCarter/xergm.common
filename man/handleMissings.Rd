@@ -15,5 +15,5 @@ This function deals with missing data in matrices or network objects used for in
 \item{logical}{ Return a matrix with logical values indicating which cells should be removed? By default the manipulated matrix is returned. }
 }
 \seealso{
-\link{adjust} \link{preprocess}
+\link{adjust}
 }
