@@ -13,6 +13,6 @@ r_check_args: --as-cran
 notifications:
   email:
     recipients:
-      - philip.leifeld@glasgow.ac.uk
+      - philip.leifeld@essex.ac.uk
     on_success: change
     on_failure: change
